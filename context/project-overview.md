@@ -676,7 +676,12 @@ Colour is never the only signal — every type-coloured card also carries its ic
 
 ---
 
-## 12. Build Order
+## 12. Screenshots
+Refer to the screenshots below as a base for the dashboard UI. It doesn't have to be exact. Use it as a reference: 
+- @context/screenshots/dashboard-ui-main.png
+- @context/screenshots/dashboard-ui-drawer.png
+
+## 13. Build Order
 
 ```mermaid
 graph LR
@@ -696,7 +701,7 @@ graph LR
 
 ---
 
-## 13. Open Questions
+## 14. Open Questions
 
 | # | Question | Notes |
 |---|---|---|
@@ -713,7 +718,7 @@ graph LR
 
 ---
 
-## 14. Reference Links
+## 15. Reference Links
 
 | Resource | URL |
 |---|---|
