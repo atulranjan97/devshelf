@@ -1,0 +1,211 @@
+// prisma/schema.prisma
+// Prisma 7 — ESM-only, TS query compiler, generated client lives in src/, not node_modules.
+
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  compilerBuild = "fast" // "small" if bundle size on edge/serverless matters more
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ItemKind {
+  TEXT
+  URL
+  FILE
+}
+
+// ─────────────────────────────────────────────
+// Auth (Auth.js v5 + Prisma adapter)
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String? // null for OAuth-only accounts
+
+  // Billing
+  isPro                  Boolean   @default(false)
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  accounts    Account[]
+  sessions    Session[]
+  items       Item[]
+  collections Collection[]
+  tags        Tag[]
+  itemTypes   ItemType[] // custom types only
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─────────────────────────────────────────────
+// Core domain
+// ─────────────────────────────────────────────
+
+model ItemType {
+  id       String   @id @default(cuid())
+  name     String // "Snippet"
+  slug     String // "snippets" → /items/snippets
+  kind     ItemKind @default(TEXT)
+  icon     String // lucide icon name, e.g. "Code"
+  color    String // hex, e.g. "#3b82f6"
+  isSystem Boolean  @default(false)
+  isPro    Boolean  @default(false) // file + image
+
+  userId String? // null for the 7 system types
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items                 Item[]
+  defaultForCollections Collection[] @relation("CollectionDefaultType")
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, slug]) // see migration note below re: system types
+  @@index([userId])
+}
+
+model Item {
+  id          String  @id @default(cuid())
+  title       String
+  description String? // short blurb; AI summary can fill this
+
+  // TEXT kinds
+  content  String? @db.Text
+  language String? // syntax highlighting hint: "tsx", "bash", …
+
+  // URL kinds
+  url String?
+
+  // FILE kinds (Cloudflare R2)
+  fileKey  String? // object key — REQUIRED to delete from the bucket
+  fileUrl  String?
+  fileName String?
+  fileSize Int? // bytes
+  mimeType String?
+
+  isFavorite Boolean   @default(false)
+  isPinned   Boolean   @default(false)
+  lastUsedAt DateTime? // powers "Recently used"
+
+  userId     String
+  itemTypeId String
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemType    ItemType         @relation(fields: [itemTypeId], references: [id], onDelete: Restrict)
+  collections ItemCollection[]
+  tags        ItemTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, itemTypeId])
+  @@index([userId, lastUsedAt(sort: Desc)])
+  @@index([userId, isPinned])
+}
+
+model Collection {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  isFavorite  Boolean @default(false)
+
+  userId        String
+  defaultTypeId String? // colours the card while the collection is empty
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultType ItemType?        @relation("CollectionDefaultType", fields: [defaultTypeId], references: [id], onDelete: SetNull)
+  items       ItemCollection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model ItemCollection {
+  itemId       String
+  collectionId String
+  addedAt      DateTime @default(now())
+
+  item       Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, collectionId])
+  @@index([collectionId, addedAt(sort: Desc)])
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items ItemTag[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, name]) // tags are per-user, not global
+  @@index([userId])
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@index([tagId])
+}
