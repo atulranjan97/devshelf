@@ -1,18 +1,5 @@
 import Link from "next/link";
-import {
-  ChevronDown,
-  Code,
-  File,
-  Folder,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  Settings,
-  Sparkles,
-  Star,
-  StickyNote,
-  Terminal,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, Code, Folder, Settings, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,6 +23,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { typeIcons } from "@/lib/item-type-icons";
 import {
   collections,
   currentUser,
@@ -43,16 +31,6 @@ import {
   itemTypes,
   mockItemTypeCounts,
 } from "@/lib/mock-data";
-
-const typeIcons: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  StickyNote,
-  Terminal,
-  Link: LinkIcon,
-  File,
-  Image: ImageIcon,
-};
 
 function getCollectionItemCount(collectionId: string) {
   return items.filter((item) => item.collectionIds.includes(collectionId)).length;
