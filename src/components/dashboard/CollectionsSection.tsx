@@ -1,22 +1,14 @@
 import { Code, Star } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { getRecentCollections, type CollectionWithStats } from "@/lib/db/collections";
 import { typeIcons } from "@/lib/item-type-icons";
-import { collections, items, itemTypes, type MockCollection } from "@/lib/mock-data";
 
-function CollectionCard({ collection }: { collection: MockCollection }) {
-  const defaultType = itemTypes.find((t) => t.id === collection.defaultTypeId);
-  const collectionItems = items.filter((item) =>
-    item.collectionIds.includes(collection.id)
-  );
-  const typesInCollection = itemTypes.filter((type) =>
-    collectionItems.some((item) => item.itemTypeId === type.id)
-  );
-
+function CollectionCard({ collection }: { collection: CollectionWithStats }) {
   return (
     <Card
       className="border-l-4 py-4 transition-colors hover:ring-primary/20"
-      style={{ borderLeftColor: defaultType?.color }}
+      style={{ borderLeftColor: collection.dominantType?.color }}
     >
       <CardContent className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
@@ -26,16 +18,16 @@ function CollectionCard({ collection }: { collection: MockCollection }) {
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          {collectionItems.length} {collectionItems.length === 1 ? "item" : "items"}
+          {collection.itemCount} {collection.itemCount === 1 ? "item" : "items"}
         </p>
-        <p className="text-sm text-muted-foreground">{collection.description}</p>
-        {typesInCollection.length > 0 && (
+        {collection.description && (
+          <p className="text-sm text-muted-foreground">{collection.description}</p>
+        )}
+        {collection.types.length > 0 && (
           <div className="flex items-center gap-1.5 pt-1">
-            {typesInCollection.map((type) => {
+            {collection.types.map((type) => {
               const Icon = typeIcons[type.icon] ?? Code;
-              return (
-                <Icon key={type.id} className="size-4" style={{ color: type.color }} />
-              );
+              return <Icon key={type.id} className="size-4" style={{ color: type.color }} />;
             })}
           </div>
         )}
@@ -44,7 +36,9 @@ function CollectionCard({ collection }: { collection: MockCollection }) {
   );
 }
 
-export function CollectionsSection() {
+export async function CollectionsSection() {
+  const collections = await getRecentCollections();
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">Recent Collections</h2>

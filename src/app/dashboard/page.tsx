@@ -6,6 +6,8 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
   return (
     <SidebarProvider className="flex h-dvh min-h-0 w-full flex-col">
