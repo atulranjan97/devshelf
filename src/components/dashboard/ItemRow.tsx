@@ -14,7 +14,7 @@ export function ItemRow({ item }: { item: ItemWithType }) {
 
   return (
     <Card
-      className="border-l-4 py-3 transition-colors hover:ring-primary/20"
+      className="border-l-2 py-3 transition-colors hover:ring-primary/30"
       style={{ borderLeftColor: type.color }}
     >
       <CardContent className="flex items-start gap-3">

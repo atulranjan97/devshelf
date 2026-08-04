@@ -86,3 +86,40 @@ export async function getItemStats(): Promise<ItemStats> {
 
   return { total, favorites };
 }
+
+export interface ItemTypeWithCount {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  color: string;
+  count: number;
+}
+
+export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
+  const types = await prisma.itemType.findMany({
+    where: { isSystem: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  if (!user) {
+    return types.map((type) => ({ ...type, count: 0 }));
+  }
+
+  const counts = await prisma.item.groupBy({
+    by: ["itemTypeId"],
+    where: { userId: user.id },
+    _count: true,
+  });
+  const countByTypeId = new Map(counts.map((c) => [c.itemTypeId, c._count]));
+
+  return types.map((type) => ({
+    id: type.id,
+    name: type.name,
+    slug: type.slug,
+    icon: type.icon,
+    color: type.color,
+    count: countByTypeId.get(type.id) ?? 0,
+  }));
+}

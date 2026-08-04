@@ -1,24 +1,18 @@
 ## Current Feature
 
-Dashboard Items — Real Data
+_None — pick the next feature to work on._
 
 ## Status
 
-Completed
+
 
 ## Goals
 
-- Replace dummy item data in the main dashboard area (pinned + recent items) with real data from Neon via Prisma, matching the existing layout/design.
-- If there are no pinned items, nothing should display there.
+
 
 ## Notes
 
-- Create `src/lib/db/items.ts` with data fetching functions.
-- Fetch items directly in the server component.
-- Item card icon/border derived from the item type.
-- Display item type tags and anything else currently shown; reference `context/screenshots/dashboard-ui-main.png` if needed.
-- Update collection stats display.
-- Full spec: `context/features/dashboard-items-spec.md`.
+
 
 ## History
 
@@ -32,3 +26,4 @@ Completed
 - 2026-08-03: Seed data — added `prisma/seed.ts` per `context/features/seed-spec.md`, wired up via `migrations.seed` in `prisma.config.ts` (Prisma 7 removed automatic seeding on `migrate dev`/`reset`; it now only runs via `npx prisma db seed`). Installed `bcryptjs` to hash the demo user's password (12 rounds). Seeds one demo user, all 7 system item types, and 5 collections (React Patterns, AI Workflows, DevOps, Terminal Commands, Design Resources) totaling 18 items across snippets, prompts, commands, and links (real URLs for docs/design references). Script is idempotent — reruns via `findFirst`/`upsert` instead of blind creates, verified by running it twice and confirming row counts didn't change. Build and lint pass.
 - 2026-08-03: Dashboard Collections — Real Data, per `context/features/dashboard-collections-spec.md`. Added `src/lib/db/collections.ts` (`getRecentCollections`), fetched from a new async server component in `CollectionsSection.tsx` — replaces `@/lib/mock-data` for the Recent Collections grid. Border color now derives from the most-used item type in each collection (falls back to the collection's `defaultType` when empty); type icons row reflects the real distinct types present. Query is keyed off the seeded demo user's email as a stand-in until Auth.js sessions exist. Marked `/dashboard` `export const dynamic = "force-dynamic"` since it was building fully static and would have baked the DB query result in at build time. Scope intentionally excludes `StatsCards` (Items/Collections/Favorite counts remain on mock data) and the per-collection item list (`PinnedItems`/`RecentItems`), both deferred to a later feature. Build and lint pass.
 - 2026-08-04: Dashboard Items — Real Data, per `context/features/dashboard-items-spec.md`. Added `src/lib/db/items.ts` (`getPinnedItems`, `getRecentItems`, `getItemStats`) and `getCollectionStats` in `src/lib/db/collections.ts`; `ItemRow`, `PinnedItems`, `RecentItems`, and `StatsCards` are now async server components on real Prisma data instead of `@/lib/mock-data`. Item card icon/border color derive from the real `itemType` relation; tags come from the `ItemTag`/`Tag` join. `PinnedItems` renders nothing when there are no pinned items (matches spec — current seed data has none). Verified by fetching the rendered `/dashboard` HTML directly: stats show real counts (18 items, 5 collections, 0 favorites, matching seed data) and Recent Items lists 10 real items with correct per-type icon/color. Scope intentionally excludes `AppSidebar`'s per-type/per-collection counts, still on mock data. Build and lint pass.
+- 2026-08-04: Stats & Sidebar — Real Data, per `context/features/stats-sidebar-spec.md`. Added `getItemTypesWithCounts()` to `src/lib/db/items.ts` (the 7 system item types with real per-user item counts via `prisma.item.groupBy`). `AppSidebar` is now an async server component: the Types list uses real icons/colors/counts and links to `/items/[slug]`; Collections uses `getRecentCollections()` — favorites keep the star icon, recents show a colored circle for the collection's dominant item type instead of a generic folder icon. Added a "View all collections" link under the list, pointing to `/collections`. `StatsCards` needed no changes — it was already on real data from the prior feature. Verified by fetching the rendered `/dashboard` HTML from the running dev server: type badges show real counts, and e.g. "Design Resources" renders its dominant-type color (`#10b981`) with a count badge of 4. Build and lint pass.

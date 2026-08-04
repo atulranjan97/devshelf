@@ -23,20 +23,17 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { getRecentCollections } from "@/lib/db/collections";
+import { getItemTypesWithCounts } from "@/lib/db/items";
 import { typeIcons } from "@/lib/item-type-icons";
-import {
-  collections,
-  currentUser,
-  items,
-  itemTypes,
-  mockItemTypeCounts,
-} from "@/lib/mock-data";
+import { currentUser } from "@/lib/mock-data";
 
-function getCollectionItemCount(collectionId: string) {
-  return items.filter((item) => item.collectionIds.includes(collectionId)).length;
-}
+export async function AppSidebar() {
+  const [itemTypes, collections] = await Promise.all([
+    getItemTypesWithCounts(),
+    getRecentCollections(),
+  ]);
 
-export function AppSidebar() {
   const favoriteCollections = collections.filter((c) => c.isFavorite);
   const recentCollections = collections.filter((c) => !c.isFavorite);
 
@@ -63,9 +60,7 @@ export function AppSidebar() {
                       <Icon style={{ color: type.color }} />
                       <span>{type.name}</span>
                     </SidebarMenuButton>
-                    <SidebarMenuBadge>
-                      {mockItemTypeCounts[type.id] ?? 0}
-                    </SidebarMenuBadge>
+                    <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                   </SidebarMenuItem>
                 );
               })}
@@ -97,7 +92,7 @@ export function AppSidebar() {
                           </SidebarMenuButton>
                           <SidebarMenuBadge className="flex items-center gap-1">
                             <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                            {getCollectionItemCount(collection.id)}
+                            {collection.itemCount}
                           </SidebarMenuBadge>
                         </SidebarMenuItem>
                       ))}
@@ -114,17 +109,31 @@ export function AppSidebar() {
                       {recentCollections.map((collection) => (
                         <SidebarMenuItem key={collection.id}>
                           <SidebarMenuButton tooltip={collection.name}>
-                            <Folder />
+                            <span
+                              className="size-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: collection.dominantType?.color ?? "var(--muted-foreground)" }}
+                            />
                             <span>{collection.name}</span>
                           </SidebarMenuButton>
-                          <SidebarMenuBadge>
-                            {getCollectionItemCount(collection.id)}
-                          </SidebarMenuBadge>
+                          <SidebarMenuBadge>{collection.itemCount}</SidebarMenuBadge>
                         </SidebarMenuItem>
                       ))}
                     </SidebarMenu>
                   </div>
                 )}
+
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      render={<Link href="/collections" />}
+                      tooltip="View all collections"
+                      className="text-sidebar-foreground/70"
+                    >
+                      <Folder />
+                      <span>View all collections</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>

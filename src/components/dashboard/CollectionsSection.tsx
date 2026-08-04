@@ -7,7 +7,7 @@ import { typeIcons } from "@/lib/item-type-icons";
 function CollectionCard({ collection }: { collection: CollectionWithStats }) {
   return (
     <Card
-      className="border-l-4 py-4 transition-colors hover:ring-primary/20"
+      className="border-l-2 py-4 transition-colors hover:ring-primary/30"
       style={{ borderLeftColor: collection.dominantType?.color }}
     >
       <CardContent className="flex flex-col gap-2">
