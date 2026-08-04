@@ -73,3 +73,20 @@ export async function getRecentCollections(limit = 6): Promise<CollectionWithSta
     };
   });
 }
+
+export interface CollectionStats {
+  total: number;
+  favorites: number;
+}
+
+export async function getCollectionStats(): Promise<CollectionStats> {
+  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  if (!user) return { total: 0, favorites: 0 };
+
+  const [total, favorites] = await Promise.all([
+    prisma.collection.count({ where: { userId: user.id } }),
+    prisma.collection.count({ where: { userId: user.id, isFavorite: true } }),
+  ]);
+
+  return { total, favorites };
+}

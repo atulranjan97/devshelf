@@ -1,10 +1,10 @@
 import { Pin } from "lucide-react";
 
 import { ItemRow } from "@/components/dashboard/ItemRow";
-import { items } from "@/lib/mock-data";
+import { getPinnedItems } from "@/lib/db/items";
 
-export function PinnedItems() {
-  const pinnedItems = items.filter((item) => item.isPinned);
+export async function PinnedItems() {
+  const pinnedItems = await getPinnedItems();
 
   if (pinnedItems.length === 0) return null;
 

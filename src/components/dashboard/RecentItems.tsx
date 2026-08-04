@@ -1,10 +1,8 @@
 import { ItemRow } from "@/components/dashboard/ItemRow";
-import { items } from "@/lib/mock-data";
+import { getRecentItems } from "@/lib/db/items";
 
-export function RecentItems() {
-  const recentItems = [...items]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 10);
+export async function RecentItems() {
+  const recentItems = await getRecentItems();
 
   return (
     <section className="flex flex-col gap-3">

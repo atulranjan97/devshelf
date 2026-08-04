@@ -2,12 +2,12 @@ import { Pin, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import type { ItemWithType } from "@/lib/db/items";
 import { TypeIcon } from "@/lib/item-type-icons";
-import { itemTypes, type MockItem } from "@/lib/mock-data";
 
-export function ItemRow({ item }: { item: MockItem }) {
-  const type = itemTypes.find((t) => t.id === item.itemTypeId);
-  const date = new Date(item.updatedAt).toLocaleDateString("en-US", {
+export function ItemRow({ item }: { item: ItemWithType }) {
+  const type = item.itemType;
+  const date = item.updatedAt.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
@@ -15,14 +15,14 @@ export function ItemRow({ item }: { item: MockItem }) {
   return (
     <Card
       className="border-l-4 py-3 transition-colors hover:ring-primary/20"
-      style={{ borderLeftColor: type?.color }}
+      style={{ borderLeftColor: type.color }}
     >
       <CardContent className="flex items-start gap-3">
         <span
           className="flex size-9 shrink-0 items-center justify-center rounded-md"
-          style={{ backgroundColor: `${type?.color}1a`, color: type?.color }}
+          style={{ backgroundColor: `${type.color}1a`, color: type.color }}
         >
-          <TypeIcon icon={type?.icon} className="size-4" />
+          <TypeIcon icon={type.icon} className="size-4" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-center gap-1.5">
@@ -34,9 +34,11 @@ export function ItemRow({ item }: { item: MockItem }) {
               <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
             )}
           </div>
-          <p className="truncate text-sm text-muted-foreground">
-            {item.description}
-          </p>
+          {item.description && (
+            <p className="truncate text-sm text-muted-foreground">
+              {item.description}
+            </p>
+          )}
           {item.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1">
               {item.tags.map((tag) => (
