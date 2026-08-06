@@ -1,21 +1,18 @@
-## Current Feature: Add Pro Badge to Sidebar
+## Current Feature
+
+_None — pick the next feature to work on._
 
 ## Status
 
-In Progress
+
 
 ## Goals
 
-- Show a "PRO" badge next to the Files and Images item types in the sidebar Types list
-- Use the ShadCN `Badge` component
-- Badge is clean/subtle (not loud) and text is all uppercase
+
 
 ## Notes
 
-- Spec: `context/features/add-pro-badge-sidebar.md`
-- Sidebar is `src/components/dashboard/AppSidebar.tsx`; the Types list renders from `getItemTypesWithCounts()` in `src/lib/db/items.ts`.
-- `ItemType.isPro` already exists in the Prisma schema (true for `file`/`image`), but `getItemTypesWithCounts()` doesn't currently select/return it — needs to be added to the mapped return object to drive the badge.
-- Existing count badge uses `SidebarMenuBadge`; the new Pro badge should sit alongside it without cluttering the row (icon-collapsed sidebar state should also be considered).
+
 
 ## History
 
@@ -30,3 +27,4 @@ In Progress
 - 2026-08-03: Dashboard Collections — Real Data, per `context/features/dashboard-collections-spec.md`. Added `src/lib/db/collections.ts` (`getRecentCollections`), fetched from a new async server component in `CollectionsSection.tsx` — replaces `@/lib/mock-data` for the Recent Collections grid. Border color now derives from the most-used item type in each collection (falls back to the collection's `defaultType` when empty); type icons row reflects the real distinct types present. Query is keyed off the seeded demo user's email as a stand-in until Auth.js sessions exist. Marked `/dashboard` `export const dynamic = "force-dynamic"` since it was building fully static and would have baked the DB query result in at build time. Scope intentionally excludes `StatsCards` (Items/Collections/Favorite counts remain on mock data) and the per-collection item list (`PinnedItems`/`RecentItems`), both deferred to a later feature. Build and lint pass.
 - 2026-08-04: Dashboard Items — Real Data, per `context/features/dashboard-items-spec.md`. Added `src/lib/db/items.ts` (`getPinnedItems`, `getRecentItems`, `getItemStats`) and `getCollectionStats` in `src/lib/db/collections.ts`; `ItemRow`, `PinnedItems`, `RecentItems`, and `StatsCards` are now async server components on real Prisma data instead of `@/lib/mock-data`. Item card icon/border color derive from the real `itemType` relation; tags come from the `ItemTag`/`Tag` join. `PinnedItems` renders nothing when there are no pinned items (matches spec — current seed data has none). Verified by fetching the rendered `/dashboard` HTML directly: stats show real counts (18 items, 5 collections, 0 favorites, matching seed data) and Recent Items lists 10 real items with correct per-type icon/color. Scope intentionally excludes `AppSidebar`'s per-type/per-collection counts, still on mock data. Build and lint pass.
 - 2026-08-04: Stats & Sidebar — Real Data, per `context/features/stats-sidebar-spec.md`. Added `getItemTypesWithCounts()` to `src/lib/db/items.ts` (the 7 system item types with real per-user item counts via `prisma.item.groupBy`). `AppSidebar` is now an async server component: the Types list uses real icons/colors/counts and links to `/items/[slug]`; Collections uses `getRecentCollections()` — favorites keep the star icon, recents show a colored circle for the collection's dominant item type instead of a generic folder icon. Added a "View all collections" link under the list, pointing to `/collections`. `StatsCards` needed no changes — it was already on real data from the prior feature. Verified by fetching the rendered `/dashboard` HTML from the running dev server: type badges show real counts, and e.g. "Design Resources" renders its dominant-type color (`#10b981`) with a count badge of 4. Build and lint pass.
+- 2026-08-06: Add Pro Badge to Sidebar, per `context/features/add-pro-badge-sidebar.md`. Added `isPro` to `ItemTypeWithCount` and to `getItemTypesWithCounts()`'s return (`src/lib/db/items.ts`), sourced from the existing `ItemType.isPro` column. `AppSidebar`'s Types list renders a subtle uppercase "Pro" `Badge` (outline variant, muted, `h-4`/`text-[10px]`) next to File and Image only, hidden when the sidebar is icon-collapsed. Review caught that the new badge span became the last child in the row, hijacking the sidebar's `[&>span:last-child]:truncate` CSS convention meant for the type name — fixed by putting `truncate` directly on the name span so it truncates correctly regardless of what's appended after it. Build and lint pass.
