@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronDown, Code, Folder, Settings, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -58,7 +59,15 @@ export async function AppSidebar() {
                       tooltip={type.name}
                     >
                       <Icon style={{ color: type.color }} />
-                      <span>{type.name}</span>
+                      <span className="truncate">{type.name}</span>
+                      {type.isPro && (
+                        <Badge
+                          variant="outline"
+                          className="h-4 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden"
+                        >
+                          Pro
+                        </Badge>
+                      )}
                     </SidebarMenuButton>
                     <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                   </SidebarMenuItem>

@@ -1,18 +1,21 @@
-## Current Feature
-
-_None — pick the next feature to work on._
+## Current Feature: Add Pro Badge to Sidebar
 
 ## Status
 
-
+In Progress
 
 ## Goals
 
-
+- Show a "PRO" badge next to the Files and Images item types in the sidebar Types list
+- Use the ShadCN `Badge` component
+- Badge is clean/subtle (not loud) and text is all uppercase
 
 ## Notes
 
-
+- Spec: `context/features/add-pro-badge-sidebar.md`
+- Sidebar is `src/components/dashboard/AppSidebar.tsx`; the Types list renders from `getItemTypesWithCounts()` in `src/lib/db/items.ts`.
+- `ItemType.isPro` already exists in the Prisma schema (true for `file`/`image`), but `getItemTypesWithCounts()` doesn't currently select/return it — needs to be added to the mapped return object to drive the badge.
+- Existing count badge uses `SidebarMenuBadge`; the new Pro badge should sit alongside it without cluttering the row (icon-collapsed sidebar state should also be considered).
 
 ## History
 

@@ -93,6 +93,7 @@ export interface ItemTypeWithCount {
   slug: string;
   icon: string;
   color: string;
+  isPro: boolean;
   count: number;
 }
 
@@ -120,6 +121,7 @@ export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {
     slug: type.slug,
     icon: type.icon,
     color: type.color,
+    isPro: type.isPro,
     count: countByTypeId.get(type.id) ?? 0,
   }));
 }
